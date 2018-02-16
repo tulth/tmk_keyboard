@@ -72,36 +72,61 @@ static inline bool is_debounce_done(void)
     _debounce_complete = true;
     return true;
   }
-
   return false;
 }
-  
-#include <keymap.h>  // FIXME DELETEME FOR TEST
-uint8_t matrix_scan(void)
+
+static inline void blink_update()
 {
   if ((millis() - blink_ms_elapsed) > 200) {
     GPIOC_PTOR = (1<<5);
     blink_ms_elapsed = millis();
   }
+}
 
-  keypos_t keypos;
-  for (keypos.row=0; keypos.row<MATRIX_ROWS; keypos.row++) {
-    select_row(keypos.row);
-    matrix_row_t cols = read_cols();
-    for (keypos.col=0; keypos.col<MATRIX_COLS; keypos.col++) {
-      if (matrix_debouncing[keypos.row] != cols) {
-        matrix_debouncing[keypos.row] = cols;
-        start_debounce_timer();
-      }
+#define ROW_STROBE_DELAY_US 30
+uint8_t scan_row = 0;
+bool row_strobe_not_read = true;
+uint32_t row_strobe_delay_timestamp_us;
+static inline void row_strobe_update()
+{
+  // strobe the row, then wait ROW_STROBE_DELAY_US (before reading the column values)
+  // should give time for the matrix to settle between strobes
+  select_row(scan_row);
+  if ((micros() - row_strobe_delay_timestamp_us) > ROW_STROBE_DELAY_US) {
+    row_strobe_not_read = false;
+  }
+}
+static inline void col_read_update()
+{
+  matrix_row_t cols = read_cols();
+  for (uint8_t scan_col=0; scan_col<MATRIX_COLS; scan_col++) {
+    if (matrix_debouncing[scan_row] != cols) {
+      matrix_debouncing[scan_row] = cols;
+      start_debounce_timer();
     }
+  }
     
+  scan_row++;
+  if(scan_row>=MATRIX_ROWS) {
+    scan_row=0;
     if (is_debounce_done()) {
       for (uint8_t i = 0; i < MATRIX_ROWS; i++) {
         matrix[i] = matrix_debouncing[i];
       }
     }
   }
-  
+  row_strobe_not_read = true;
+  row_strobe_delay_timestamp_us = micros();
+}
+
+uint8_t matrix_scan(void)
+{
+  blink_update();
+  if (row_strobe_not_read) {
+    row_strobe_update();
+  } else {
+    col_read_update();
+  }
   return 1;
 }
 
@@ -157,7 +182,6 @@ uint8_t matrix_key_count(void)
 
 matrix_row_t read_cols(void)
 {
-  delayMicroseconds(30);
   return
     (0xFF & ~(GPIOD_PDIR << 0)) |
     (kinesis_keypad_button_depressed() ? (1 << 8): 0) |
