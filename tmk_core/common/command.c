@@ -299,6 +299,9 @@ static bool command_common(uint8_t code)
 #ifdef PROTOCOL_CHIBIOS
             " CHIBIOS"
 #endif
+#ifdef PROTOCOL_TEENSY3
+            " TEENSY3"
+#endif
 #ifdef BOOTMAGIC_ENABLE
             " BOOTMAGIC"
 #endif

@@ -55,6 +55,14 @@ void print_set_sendchar(int8_t (*print_sendchar_func)(uint8_t));
 #define println(s)  printf(s "\r\n")
 #define xprintf  printf
 
+#elif defined(PROTOCOL_TEENSY3)
+
+#include "teensy3/printf.h"
+
+#define print(s)    printf(s)
+#define println(s)  printf(s "\r\n")
+#define xprintf  printf
+
 #elif defined(__arm__) /* __AVR__ */
 
 #include "mbed/xprintf.h"

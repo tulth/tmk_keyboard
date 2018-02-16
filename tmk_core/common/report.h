@@ -89,6 +89,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #   define KEYBOARD_REPORT_SIZE NKRO_EPSIZE
 #   define KEYBOARD_REPORT_KEYS (NKRO_EPSIZE - 2)
 #   define KEYBOARD_REPORT_BITS (NKRO_EPSIZE - 1)
+#elif defined(PROTOCOL_TEENSY3) && defined(NKRO_ENABLE)
+#   include "protocol/teensy3/usb_main.h"
+#   define KEYBOARD_REPORT_SIZE NKRO_EPSIZE
+#   define KEYBOARD_REPORT_KEYS (NKRO_EPSIZE - 2)
+#   define KEYBOARD_REPORT_BITS (NKRO_EPSIZE - 1)
 
 #else
 #   define KEYBOARD_REPORT_SIZE 8
