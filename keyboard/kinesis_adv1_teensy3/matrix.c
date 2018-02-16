@@ -11,7 +11,6 @@
 #ifndef DEBOUNCE
 #   define DEBOUNCE	5
 #endif
-static uint8_t debouncing = DEBOUNCE;
 
 /* matrix state(1:on, 0:off) */
 static matrix_row_t matrix[MATRIX_ROWS];
@@ -50,6 +49,31 @@ void matrix_init(void)
 
 unsigned long blink_ms_elapsed = 0;
 
+bool _debounce_complete = false;
+uint32_t debounce_timestamp = 0;
+
+static inline void start_debounce_timer(void)
+{
+  debounce_timestamp = millis();
+  _debounce_complete = false;
+}
+
+static inline uint32_t get_debounce_elapsed(void)
+{
+  return millis() - debounce_timestamp;
+}
+
+static inline bool is_debounce_done(void)
+{
+  if (_debounce_complete) {
+    return true;
+  }
+  if (get_debounce_elapsed() > DEBOUNCE) {
+    _debounce_complete = true;
+    return true;
+  }
+}
+  
 #include <keymap.h>  // FIXME DELETEME FOR TEST
 uint8_t matrix_scan(void)
 {
@@ -65,20 +89,15 @@ uint8_t matrix_scan(void)
     for (keypos.col=0; keypos.col<MATRIX_COLS; keypos.col++) {
       if (matrix_debouncing[keypos.row] != cols) {
         matrix_debouncing[keypos.row] = cols;
-        debouncing = DEBOUNCE;
+        start_debounce_timer();
       }
     }
     
-    if (debouncing) {
-      if (--debouncing) {
-        delay(1);
-      } else {
-        for (uint8_t i = 0; i < MATRIX_ROWS; i++) {
-          matrix[i] = matrix_debouncing[i];
-        }
+    if (is_debounce_done()) {
+      for (uint8_t i = 0; i < MATRIX_ROWS; i++) {
+        matrix[i] = matrix_debouncing[i];
       }
     }
-    
   }
   
   return 1;
@@ -86,7 +105,7 @@ uint8_t matrix_scan(void)
 
 bool matrix_is_modified(void)
 {
-  return debouncing == 0;
+  return is_debounce_done();
 }
 
 inline
