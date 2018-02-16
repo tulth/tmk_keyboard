@@ -22,13 +22,14 @@ void kinesis_led_config(void)
   GPIOC_PDDR |= (1<<6); 
 }
 
-static unsigned long buzzer_duration_ms;
+static unsigned long buzzer_duration_ms = 0;
 static unsigned long buzzer_halfperiod_us;
 static unsigned long buzzer_duration_elapsed_ms;
 static unsigned long buzzer_halfperiod_elapsed_us;
 
 bool kinesis_buzzer_busy(void)
 {
+  /* printf("buzzer_duration_ms %d\n", buzzer_duration_ms); */
   return buzzer_duration_ms > 0;
 }
 
@@ -68,6 +69,7 @@ void kinesis_buzzer_update(void)
   if (buzzer_duration_ms <= 0) {
     return;
   }
+  /* printf("buzzer_elapsed %d\n", millis()-buzzer_duration_elapsed_ms); */
   if ((millis()-buzzer_duration_elapsed_ms) <= buzzer_duration_ms) {
     if ((micros() - buzzer_halfperiod_elapsed_us) >= buzzer_halfperiod_us) {
       buzzer_halfperiod_elapsed_us = micros();  
