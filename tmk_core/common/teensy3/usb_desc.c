@@ -35,7 +35,7 @@
 #ifdef NUM_ENDPOINTS
 #include "usb_names.h"
 #include "kinetis.h"
-#include <stdlib.h>
+#include <nonstd.h>
 
 // USB Descriptors are binary data which the USB host reads to
 // automatically detect a USB device's capabilities.  The format
