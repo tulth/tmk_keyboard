@@ -72,6 +72,8 @@ static inline bool is_debounce_done(void)
     _debounce_complete = true;
     return true;
   }
+
+  return false;
 }
   
 #include <keymap.h>  // FIXME DELETEME FOR TEST
