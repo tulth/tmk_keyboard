@@ -295,16 +295,16 @@ static uint8_t keyboard2_report_desc[] = {
 #define HID_LISTEN_HID_DESC_NUM              (MOUSE_HID_DESC_NUM + 1)
 #define HID_LISTEN_HID_DESC_OFFSET           (9+(9+9+7)*HID_LISTEN_HID_DESC_NUM+9)
 
-#define KEYMEDIA_HID_DESC_NUM           (HID_LISTEN_HID_DESC_NUM + 1)
-#define KEYMEDIA_HID_DESC_OFFSET        (9+(9+9+7)*KEYMEDIA_HID_DESC_NUM+9)
+#define EXTRA_HID_DESC_NUM           (HID_LISTEN_HID_DESC_NUM + 1)
+#define EXTRA_HID_DESC_OFFSET        (9+(9+9+7)*EXTRA_HID_DESC_NUM+9)
 
 #ifdef NKRO_ENABLE
-#define KBD2_HID_DESC_NUM            (KEYMEDIA_HID_DESC_NUM + 1)
-#define KBD2_HID_DESC_OFFSET         (9+(9+9+7)*KEYMEDIA_HID_DESC_NUM+9)
+#define KBD2_HID_DESC_NUM            (EXTRA_HID_DESC_NUM + 1)
+#define KBD2_HID_DESC_OFFSET         (9+(9+9+7)*EXTRA_HID_DESC_NUM+9)
 #define NUM_INTERFACES                  (KBD2_HID_DESC_NUM + 1)
 #define CONFIG_DESC_SIZE               (9+(9+9+7)*NUM_INTERFACES)
 #else
-#define NUM_INTERFACES                  (KEYMEDIA_HID_DESC_NUM + 1)
+#define NUM_INTERFACES                  (EXTRA_HID_DESC_NUM + 1)
 #define CONFIG_DESC_SIZE               (9+(9+9+7)*NUM_INTERFACES)
 #endif
 
@@ -416,7 +416,7 @@ static uint8_t config_descriptor[CONFIG_DESC_SIZE] = {
                                        // interface descriptor, USB spec 9.6.5, page 267-269, Table 9-12
   9,                                   // bLength
   4,                                   // bDescriptorType
-  KEYMEDIA_INTERFACE,                  // bInterfaceNumber
+  EXTRA_INTERFACE,                     // bInterfaceNumber
   0,                                   // bAlternateSetting
   1,                                   // bNumEndpoints
   0x03,                                // bInterfaceClass (0x03 = HID)
@@ -435,9 +435,9 @@ static uint8_t config_descriptor[CONFIG_DESC_SIZE] = {
                                        // endpoint descriptor, USB spec 9.6.6, page 269-271, Table 9-13
   7,                                   // bLength
   5,                                   // bDescriptorType
-  KEYMEDIA_ENDPOINT | 0x80,            // bEndpointAddress
+  EXTRA_ENDPOINT | 0x80,               // bEndpointAddress
   0x03,                                // bmAttributes (0x03=intr)
-  KEYMEDIA_SIZE, 0,                    // wMaxPacketSize
+  EXTRA_SIZE, 0,                       // wMaxPacketSize
   10,                                  // bInterval
 #ifdef NKRO_ENABLE
                                        // NKRO (n-key rollover) keyboard interface
@@ -569,8 +569,8 @@ const usb_descriptor_list_t usb_descriptor_list[] = {
 	{0x2100, MOUSE_INTERFACE, config_descriptor+MOUSE_HID_DESC_OFFSET, 9},
 	{0x2200, HID_LISTEN_INTERFACE, hid_listen_report_desc, sizeof(hid_listen_report_desc)},
 	{0x2100, HID_LISTEN_INTERFACE, config_descriptor+HID_LISTEN_HID_DESC_OFFSET, 9},
-	{0x2200, KEYMEDIA_INTERFACE, keymedia_report_desc, sizeof(keymedia_report_desc)},
-	{0x2100, KEYMEDIA_INTERFACE, config_descriptor+KEYMEDIA_HID_DESC_OFFSET, 9},
+	{0x2200, EXTRA_INTERFACE, keymedia_report_desc, sizeof(keymedia_report_desc)},
+	{0x2100, EXTRA_INTERFACE, config_descriptor+EXTRA_HID_DESC_OFFSET, 9},
 #ifdef NKRO_ENABLE
 	{0x2200, KBD2_INTERFACE, keyboard2_report_desc, sizeof(keyboard2_report_desc)},
 	{0x2100, KBD2_INTERFACE, config_descriptor+KBD2_HID_DESC_OFFSET, 9},

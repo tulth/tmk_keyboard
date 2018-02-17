@@ -46,8 +46,8 @@ static const uint8_t keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   KEYMAP(
   TRNS, TRNS, TRNS, TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
   TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
-  TRNS, TRNS, MS_U, TRNS, TRNS, TRNS,
-  TRNS, MS_L, MS_D, MS_R, TRNS, TRNS,
+  TRNS, TRNS, BTN1, MS_U, BTN2, WH_U,
+  TRNS, TRNS, MS_L, MS_D, MS_R, WH_D,
   TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
         TRNS, TRNS, TRNS, TRNS,
                                       TRNS, TRNS,
@@ -57,15 +57,15 @@ static const uint8_t keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   // right hand
   TRNS, TRNS, TRNS, TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
                     TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
-                    TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
-                    TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
+                    VOLU, TRNS, TRNS, TRNS, TRNS, TRNS,
+                    VOLD, TRNS, TRNS, TRNS, TRNS, TRNS, // don't use mute it does to work w pulseaudio
                     TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
                           TRNS, TRNS, TRNS, TRNS,
         TRNS, TRNS,
         TRNS,
         TRNS, TRNS, TRNS
   ),
-  // layer 2: TBD
+  // layer 2: system, like sleep
   KEYMAP(
   TRNS, TRNS, TRNS, TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
   TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
@@ -79,7 +79,7 @@ static const uint8_t keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
   // right hand
   TRNS, TRNS, TRNS, TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
-                    TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
+                    TRNS, TRNS, TRNS, TRNS, TRNS, SLEP,
                     TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
                     TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
                     TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,

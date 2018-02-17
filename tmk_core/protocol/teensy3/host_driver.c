@@ -82,22 +82,72 @@ static void send_keyboard(report_keyboard_t *report)
 static void send_mouse(report_mouse_t *report)
 {
 #ifdef MOUSE_ENABLE
-  printf("report->x: %02X\n", report->x);
-  printf("report->y: %02X\n", report->y);
-  printf("report->v: %02X\n", report->v);
-  printf("report->h: %02X\n", report->h);
-  printf("report->buttons: %02X\n", report->buttons);
+  /* printf("report->x: %02X\n", report->x); */
+  /* printf("report->y: %02X\n", report->y); */
+  /* printf("report->v: %02X\n", report->v); */
+  /* printf("report->h: %02X\n", report->h); */
+  /* printf("report->buttons: %02X\n", report->buttons); */
+  uint32_t wait_count=0;
+  usb_packet_t *tx_packet;
+  while (1) {
+    if (!usb_configuration) {
+      return;
+    }
+    if (usb_tx_packet_count(MOUSE_ENDPOINT) < TX_PACKET_LIMIT) {
+      tx_packet = usb_malloc();
+      if (tx_packet) break;
+    }
+    if (++wait_count > TX_TIMEOUT || transmit_previous_timeout) {
+      transmit_previous_timeout = 1;
+      return;
+    }
+  }
+  memcpy(tx_packet->buf, report, sizeof(report_mouse_t));
+  tx_packet->len = sizeof(report_mouse_t);
+  usb_tx(MOUSE_ENDPOINT, tx_packet);
 #endif
 }
+
+void send_extra(uint8_t report_id, uint16_t data)
+{
+#ifdef EXTRAKEY_ENABLE
+  /* printf("extra report_id: %d\n", report_id); */
+  /* printf("extra report data: %04X\n", data); */
+  uint32_t wait_count=0;
+  usb_packet_t *tx_packet;
+  while (1) {
+    if (!usb_configuration) {
+      return;
+    }
+    if (usb_tx_packet_count(EXTRA_ENDPOINT) < TX_PACKET_LIMIT) {
+      tx_packet = usb_malloc();
+      if (tx_packet) break;
+    }
+    if (++wait_count > TX_TIMEOUT || transmit_previous_timeout) {
+      transmit_previous_timeout = 1;
+      return;
+    }
+  }
+  *(tx_packet->buf + 0) = report_id;
+  *(tx_packet->buf + 1) = data & 0xFF;
+  *(tx_packet->buf + 2) = (data>>8) & 0xFF;
+  tx_packet->len = 3;
+  usb_tx(EXTRA_ENDPOINT, tx_packet);
+#endif
+}
+
 
 static void send_system(uint16_t data)
 {
 #ifdef EXTRAKEY_ENABLE
+  return send_extra(REPORT_ID_SYSTEM, data);
 #endif
 }
 
 static void send_consumer(uint16_t data)
 {
 #ifdef EXTRAKEY_ENABLE
+  return send_extra(REPORT_ID_CONSUMER, data);
 #endif
 }
+

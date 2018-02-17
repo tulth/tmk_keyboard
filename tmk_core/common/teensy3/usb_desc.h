@@ -146,10 +146,10 @@ let me know?  http://forum.pjrc.com/forums/4-Suggestions-amp-Bug-Reports
 #define HID_LISTEN_TX_SIZE		32
 #define HID_LISTEN_TX_BUFFER		EP_DOUBLE_BUFFER
 
-#define KEYMEDIA_INTERFACE		3
-#define KEYMEDIA_ENDPOINT		4
-#define KEYMEDIA_SIZE		8
-#define KEYMEDIA_BUFFER		EP_DOUBLE_BUFFER
+#define EXTRA_INTERFACE		3
+#define EXTRA_ENDPOINT		4
+#define EXTRA_SIZE		8
+#define EXTRA_BUFFER		EP_DOUBLE_BUFFER
 
 #ifdef NKRO_ENABLE
 #define KBD2_INTERFACE		4
