@@ -40,8 +40,57 @@ static const uint8_t keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                              UP  , DOWN , LBRC  , RBRC,
         BSPC, RCTL  ,
         PGUP, /*RALT, SPC*/
-        PGDN, RALT  , SPC  
+        PGDN, RALT  , SPC
+  ),
+  // layer 1: mouse and media
+  KEYMAP(
+  TRNS, TRNS, TRNS, TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
+  TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
+  TRNS, TRNS, MS_U, TRNS, TRNS, TRNS,
+  TRNS, MS_L, MS_D, MS_R, TRNS, TRNS,
+  TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
+        TRNS, TRNS, TRNS, TRNS,
+                                      TRNS, TRNS,
+                                            TRNS,
+                                TRNS, TRNS, TRNS,
+
+  // right hand
+  TRNS, TRNS, TRNS, TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
+                    TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
+                    TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
+                    TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
+                    TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
+                          TRNS, TRNS, TRNS, TRNS,
+        TRNS, TRNS,
+        TRNS,
+        TRNS, TRNS, TRNS
+  ),
+  // layer 2: TBD
+  KEYMAP(
+  TRNS, TRNS, TRNS, TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
+  TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
+  TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
+  TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
+  TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
+        TRNS, TRNS, TRNS, TRNS,
+                                      TRNS, TRNS,
+                                            TRNS,
+                                TRNS, TRNS, TRNS,
+
+  // right hand
+  TRNS, TRNS, TRNS, TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
+                    TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
+                    TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
+                    TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
+                    TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
+                          TRNS, TRNS, TRNS, TRNS,
+        TRNS, TRNS,
+        TRNS,
+        TRNS, TRNS, TRNS
   ),
 };
 
-const action_t fn_actions[] = {};
+const action_t fn_actions[] = {
+    ACTION_LAYER_TOGGLE(1),
+    ACTION_LAYER_TOGGLE(2),
+};
