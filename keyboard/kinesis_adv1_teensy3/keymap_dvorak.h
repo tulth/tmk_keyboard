@@ -57,8 +57,8 @@ static const uint8_t keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   // right hand
   TRNS, TRNS, TRNS, TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
                     TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
-                    VOLU, TRNS, TRNS, TRNS, TRNS, TRNS,
-                    VOLD, TRNS, TRNS, TRNS, TRNS, TRNS, // don't use mute it does to work w pulseaudio
+                    VOLU, MPRV, MNXT, TRNS, TRNS, TRNS,
+                    VOLD, MSTP, MPLY, TRNS, TRNS, TRNS, // don't use mute it does to work w pulseaudio
                     TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
                           TRNS, TRNS, TRNS, TRNS,
         TRNS, TRNS,
