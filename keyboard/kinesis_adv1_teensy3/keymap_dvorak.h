@@ -68,7 +68,7 @@ static const uint8_t keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   // layer 2: system, like sleep
   KEYMAP(
   TRNS, TRNS, TRNS, TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
-  TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
+  TRNS, FN2 , FN3 , TRNS, TRNS, TRNS,
   TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
   TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
   TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
@@ -90,7 +90,39 @@ static const uint8_t keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ),
 };
 
+enum function_id {
+  DUMP_DESC,
+  DUMP_TEST_DESC,
+};
+
 const action_t fn_actions[] = {
     ACTION_LAYER_TOGGLE(1),
     ACTION_LAYER_MOMENTARY(2),
+    ACTION_FUNCTION(DUMP_DESC),
+    ACTION_FUNCTION(DUMP_TEST_DESC),
 };
+
+#include "printf.h"
+#include <usb_desc.h>
+
+void action_function(keyrecord_t *record, uint8_t id, uint8_t opt)
+{
+  if (id == DUMP_DESC) {
+    printf("** DUMP_DESC\n");
+    printf("CONFIG_DESC_SIZE: %d\n", sizeof(usb_config_t));
+    for (int i=0; i < sizeof(usb_config_t); i++) {
+      printf("%03d: %02X\n", i, ((uint8_t *) &config_descriptor)[i]);
+      delay(10);
+    }
+    printf("****************************************\n");
+  }
+  if (id == DUMP_TEST_DESC) {
+    printf("** DUMP_TEST_DESC\n");
+    /* printf("TEST_CONFIG_DESC_SIZE: %d\n", sizeof(usb_config_t)); */
+    /* for (int i=0; i < sizeof(usb_config_t); i++) { */
+    /*   printf("%03d: %02X\n", i, ((uint8_t *) &test_config_descriptor)[i]); */
+    /*   delay(10); */
+    /* } */
+    printf("****************************************\n");
+  }
+}

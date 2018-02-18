@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<descriptor xmlns="http://digimend.sourceforge.net" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://digimend.sourceforge.net hidrd.xsd">
+  <usage_page>desktop<!-- Generic desktop controls (01h) --></usage_page>
+  <usage>desktop_sys_control<!-- System control (80h, application collection) --></usage>
+  <COLLECTION type="application">
+    <report_id>2</report_id>
+    <logical_minimum>1</logical_minimum>
+    <logical_maximum>183</logical_maximum>
+    <usage_minimum>desktop_pointer<!-- Pointer (01h, physical collection) --></usage_minimum>
+    <usage_maximum>desktop_sys_dspl_lcd_autoscale<!-- System display LCD autoscale (B7h, one-shot control) --></usage_maximum>
+    <report_size>16</report_size>
+    <report_count>1</report_count>
+    <input/>
+  </COLLECTION>
+  <usage_page>consumer<!-- Consumer (0Ch) --></usage_page>
+  <usage>consumer_consumer_control<!-- Consumer control (01h, application collection) --></usage>
+  <COLLECTION type="application">
+    <report_id>3</report_id>
+    <logical_minimum>1</logical_minimum>
+    <logical_maximum>668</logical_maximum>
+    <usage_minimum>consumer_consumer_control<!-- Consumer control (01h, application collection) --></usage_minimum>
+    <usage_maximum>consumer_ac_distribute_vert<!-- AC distribute vertically (029Ch, selector) --></usage_maximum>
+    <report_size>16</report_size>
+    <report_count>1</report_count>
+    <input/>
+  </COLLECTION>
+</descriptor>

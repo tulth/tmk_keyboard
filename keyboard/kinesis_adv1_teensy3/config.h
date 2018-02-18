@@ -2,8 +2,14 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-
 /* USB Device descriptor parameter */
+#define VENDOR_ID       0xFF44
+#define PRODUCT_ID      0xFF54
+#define MANUFACTURER    Demetulth
+#define PRODUCT         Kinesis Advantage1 Upgrade
+#define DEVICE_VER      0x0001
+
+
 /* key matrix size */
 #define MATRIX_ROWS 16 // 2 74LS138 1-of-8 demultiplexers
 #define MATRIX_COLS 10 // 8 demultiplexer selected matrix columns, and two direct button inputs (pins 5 and 6)

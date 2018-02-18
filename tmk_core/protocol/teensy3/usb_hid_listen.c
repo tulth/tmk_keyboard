@@ -107,7 +107,7 @@ int usb_hid_listen_write(const void *buffer, uint32_t size)
 					tx_noautoflush = 0;
 					return -1;
 				}
-				if (usb_tx_packet_count(HID_LISTEN_TX_ENDPOINT) < TX_PACKET_LIMIT) {
+				if (usb_tx_packet_count(HID_LISTEN_ENDPOINT) < TX_PACKET_LIMIT) {
 					tx_noautoflush = 1;
 					tx_packet = usb_malloc();
 					if (tx_packet) break;
@@ -121,15 +121,15 @@ int usb_hid_listen_write(const void *buffer, uint32_t size)
 			}
 		}
 		transmit_previous_timeout = 0;
-		len = HID_LISTEN_TX_SIZE - tx_packet->index;
+		len = HID_LISTEN_SIZE - tx_packet->index;
 		if (len > size) len = size;
 		dest = tx_packet->buf + tx_packet->index;
 		tx_packet->index += len;
 		size -= len;
 		while (len-- > 0) *dest++ = *src++;
-		if (tx_packet->index >= HID_LISTEN_TX_SIZE) {
-			tx_packet->len = HID_LISTEN_TX_SIZE;
-			usb_tx(HID_LISTEN_TX_ENDPOINT, tx_packet);
+		if (tx_packet->index >= HID_LISTEN_SIZE) {
+			tx_packet->len = HID_LISTEN_SIZE;
+			usb_tx(HID_LISTEN_ENDPOINT, tx_packet);
 			tx_packet = NULL;
 		}
 		usb_hid_listen_transmit_flush_timer = TRANSMIT_FLUSH_TIMEOUT;
@@ -145,13 +145,13 @@ int usb_hid_listen_write_buffer_free(void)
 	tx_noautoflush = 1;
 	if (!tx_packet) {
 		if (!usb_configuration ||
-		  usb_tx_packet_count(HID_LISTEN_TX_ENDPOINT) >= TX_PACKET_LIMIT ||
+		  usb_tx_packet_count(HID_LISTEN_ENDPOINT) >= TX_PACKET_LIMIT ||
 		  (tx_packet = usb_malloc()) == NULL) {
 			tx_noautoflush = 0;
 			return 0;
 		}
 	}
-	len = HID_LISTEN_TX_SIZE - tx_packet->index;
+	len = HID_LISTEN_SIZE - tx_packet->index;
 	// TODO: Perhaps we need "usb_hid_listen_transmit_flush_timer = TRANSMIT_FLUSH_TIMEOUT"
 	// added here, so the SOF interrupt can't take away the available buffer
 	// space we just promised the user could write without blocking?
@@ -170,13 +170,13 @@ void usb_hid_listen_flush_output(void)
 	if (tx_packet) {
 		usb_hid_listen_transmit_flush_timer = 0;
 		tx_packet->len = tx_packet->index;
-		usb_tx(HID_LISTEN_TX_ENDPOINT, tx_packet);
+		usb_tx(HID_LISTEN_ENDPOINT, tx_packet);
 		tx_packet = NULL;
 	} else {
 		usb_packet_t *tx = usb_malloc();
 		if (tx) {
 			usb_hid_listen_transmit_flush_timer = 0;
-			usb_tx(HID_LISTEN_TX_ENDPOINT, tx);
+			usb_tx(HID_LISTEN_ENDPOINT, tx);
 		} else {
 			usb_hid_listen_transmit_flush_timer = 1;
 		}
@@ -189,12 +189,12 @@ void usb_hid_listen_flush_callback(void)
 	if (tx_noautoflush) return;
 	if (tx_packet) {
 		tx_packet->len = tx_packet->index;
-		usb_tx(HID_LISTEN_TX_ENDPOINT, tx_packet);
+		usb_tx(HID_LISTEN_ENDPOINT, tx_packet);
 		tx_packet = NULL;
 	} else {
 		usb_packet_t *tx = usb_malloc();
 		if (tx) {
-			usb_tx(HID_LISTEN_TX_ENDPOINT, tx);
+			usb_tx(HID_LISTEN_ENDPOINT, tx);
 		} else {
 			usb_hid_listen_transmit_flush_timer = 1;
 		}
