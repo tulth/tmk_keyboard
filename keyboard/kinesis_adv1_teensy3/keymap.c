@@ -25,6 +25,7 @@
 #include "report.h"
 #include "host.h"
 #include "keymap.h"
+#include "kinesis_adv1_teensy3.h"
 
 /* keymap definition macro, based on ergodox */
 #define KEYMAP(                                                                                \
@@ -151,4 +152,13 @@ uint8_t keymap_key_to_keycode(uint8_t layer, keypos_t key)
 action_t keymap_fn_to_action(uint8_t keycode)
 {
     return fn_actions[FN_INDEX(keycode)];
+}
+
+void hook_layer_change(uint32_t layer_state)
+{
+  if (layer_state == 0x000000) {
+    set_led_keypad(false);
+  } else {
+    set_led_keypad(true);
+  }
 }
