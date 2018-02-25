@@ -59,11 +59,6 @@ static inline void kinesis_set_buzzer_pin(bool val)
   }
 }
 
-static inline void kinesis_toggle_buzzer_pin(void)
-{
-  GPIOB_PTOR = (1<<0);
-}
-
 void kinesis_buzzer_update(void)
 {
   if (buzzer_duration_ms <= 0) {

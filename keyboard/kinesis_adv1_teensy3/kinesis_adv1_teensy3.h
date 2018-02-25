@@ -13,6 +13,12 @@ void kinesis_init(void);
 void kinesis_init_cols(void);
 void kinesis_unselect_rows(void);
 
+static inline void kinesis_toggle_buzzer_pin(void)
+{
+  GPIOB_PTOR = (1<<0);
+}
+
+
 static inline void set_led_teensy(bool val)
 {
   if (val != 0) {
