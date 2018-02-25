@@ -51,8 +51,8 @@ static const uint8_t keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
         TRNS, TRNS, TRNS, TRNS,
                                       TRNS, TRNS,
-                                            TRNS,
-                                TRNS, TRNS, TRNS,
+                                            WHOM,
+                                TRNS, TRNS, MYCM,
 
   // right hand
   TRNS, TRNS, TRNS, TRNS, TRNS, TRNS, TRNS, TRNS, TRNS,
