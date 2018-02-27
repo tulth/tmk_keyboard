@@ -29,10 +29,7 @@
 
 /* secondary keyboard */
 #ifdef NKRO_ENABLE
-#define NKRO_INTERFACE   4               
-#define NKRO_ENDPOINT    5               
-#define NKRO_EPSIZE      16              
-#define NKRO_REPORT_KEYS (KBD2_SIZE - 1)
+#define NKRO_EPSIZE      NKRO_SIZE
 #endif                   
 
 extern void usb_remote_wakeup(void);

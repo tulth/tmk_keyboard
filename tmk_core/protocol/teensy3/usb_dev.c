@@ -43,6 +43,7 @@
 
 #include "kinetis.h"
 #include "usb_mem.h"
+#include "host.h"
 #include <string.h> // for memset
 
 // buffer descriptor table
@@ -343,6 +344,8 @@ static void usb_setup(void)
                 return;
           case 0x0A21: // HID SET_IDLE
                 break;
+          case 0x0B21: // HID SET_PROTOCOL
+                break;
           // case 0xC940:
 #endif
           default:
@@ -442,8 +445,22 @@ static void usb_control(uint32_t stat)
                         endpoint0_transmit(NULL, 0);
                 }
 #endif
-#ifdef KEYBOARD_INTERFACE
                 if (setup.word1 == 0x02000921 && setup.word2 == ((1<<16)|KEYBOARD_INTERFACE)) {
+                  driver_keyboard_leds = buf[0];
+                  endpoint0_transmit(NULL, 0);
+                }
+                if ((setup.bmRequestType == 0x21) &&
+                    (setup.bRequest == 0x0B) &&
+                    (setup.wIndex == KEYBOARD_INTERFACE)) {
+                  keyboard_protocol = (setup.wValue & 0xFF) != 0x00;
+#ifdef NKRO_ENABLE
+                  keyboard_nkro = !!keyboard_protocol;
+#endif
+                  clear_keyboard();
+                  endpoint0_transmit(NULL, 0);
+                }
+#ifdef NKRO_ENABLE
+                if (setup.word1 == 0x02000921 && setup.word2 == ((1<<16)|NKRO_INTERFACE)) {
                   driver_keyboard_leds = buf[0];
                   endpoint0_transmit(NULL, 0);
                 }

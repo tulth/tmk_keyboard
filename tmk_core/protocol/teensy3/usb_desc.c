@@ -18,6 +18,41 @@ static uint8_t usb_report_descriptor_hid_listen[] = {
   0xC0			    // end collection
 };
 
+static uint8_t usb_report_descriptor_keyboard_nkro[] = {
+  0x05, 0x01,                           // Usage Page (Generic Desktop),
+  0x09, 0x06,                           // Usage (Keyboard),
+  0xA1, 0x01,                           // Collection (Application),
+  // bitmap of modifiers
+  0x75, 0x01,                           //   Report Size (1),
+  0x95, 0x08,                           //   Report Count (8),
+  0x05, 0x07,                           //   Usage Page (Key Codes),
+  0x19, 0xE0,                           //   Usage Minimum (224),
+  0x29, 0xE7,                           //   Usage Maximum (231),
+  0x15, 0x00,                           //   Logical Minimum (0),
+  0x25, 0x01,                           //   Logical Maximum (1),
+  0x81, 0x02,                           //   Input (Data, Variable, Absolute), ;Modifier byte
+  // LED output report
+  0x95, 0x05,                           //   Report Count (5),
+  0x75, 0x01,                           //   Report Size (1),
+  0x05, 0x08,                           //   Usage Page (LEDs),
+  0x19, 0x01,                           //   Usage Minimum (1),
+  0x29, 0x05,                           //   Usage Maximum (5),
+  0x91, 0x02,                           //   Output (Data, Variable, Absolute),
+  0x95, 0x01,                           //   Report Count (1),
+  0x75, 0x03,                           //   Report Size (3),
+  0x91, 0x03,                           //   Output (Constant),
+  // bitmap of keys
+  0x95, NKRO_REPORT_KEYS * 8,           //   Report Count (),
+  0x75, 0x01,                           //   Report Size (1),
+  0x15, 0x00,                           //   Logical Minimum (0),
+  0x25, 0x01,                           //   Logical Maximum(1),
+  0x05, 0x07,                           //   Usage Page (Key Codes),
+  0x19, 0x00,                           //   Usage Minimum (0),
+  0x29, NKRO_REPORT_KEYS * 8 - 1,       //   Usage Maximum (),
+  0x81, 0x02,                           //   Input (Data, Variable, Absolute),
+  0xc0                                  // End Collection
+};
+
 usb_descriptor_device_t device_descriptor = {
     .header = {.bLength         = sizeof(usb_descriptor_device_t),
                .bDescriptorType = USB_DESCRIPTOR_TYPE_DEVICE },
@@ -168,6 +203,37 @@ usb_config_t config_descriptor = {
     .bInterval                  = 0x0A,
   },
 #endif
+#ifdef NKRO_ENABLE
+  // n key rollover
+  {
+    .header = {.bLength         = sizeof(usb_descriptor_interface_t),
+               .bDescriptorType = USB_DESCRIPTOR_TYPE_INTERFACE },
+    .bInterfaceNumber           = NKRO_INTERFACE,
+    .bAlternateSetting          = 0,
+    .bNumEndpoints              = 1,
+    .bInterfaceClass            = USB_INTERFACE_CLASS_HID,
+    .bInterfaceSubClass         = USB_INTERFACE_CLASS_HID_SUBCLASS_NONE,
+    .bInterfaceProtocol         = USB_INTERFACE_CLASS_HID_PROTOCOL_NONE,
+    .iInterface                 = 0,
+  },
+  {
+    .header = {.bLength         = sizeof(usb_descriptor_class_hid_t),
+               .bDescriptorType = USB_DESCRIPTOR_CLASS_HID },
+    .bcdHID                     = 0x0111,
+    .bCountryCode               = 0,
+    .bNumDescriptors            = 1,
+    .bDescriptorType            = USB_DESCRIPTOR_CLASS_REPORT,
+    .wDescriptorLength          = sizeof(usb_report_descriptor_keyboard_nkro),
+  },
+  {
+    .header = {.bLength         = sizeof(usb_descriptor_endpoint_t),
+               .bDescriptorType = USB_DESCRIPTOR_TYPE_ENDPOINT },
+    .bEndpointAddress           = NKRO_ENDPOINT | USB_ENDPOINT_DIRECTION_IN,
+    .bmAttributes               = USB_ATTRIBUTE_INTERRUPT,
+    .wMaxPacketSize             = NKRO_SIZE,
+    .bInterval                  = 1,  /* polling interval in millisecond */
+  },
+#endif
 };
 
 usb_descriptor_string_t language_id = {
@@ -209,10 +275,10 @@ const usb_descriptor_list_t usb_descriptor_list[] = {
         
 	{0x2100, EXTRA_INTERFACE, (const uint8_t *)&(config_descriptor.extra_class), sizeof(usb_descriptor_class_hid_t)},
 	{0x2200, EXTRA_INTERFACE, usb_report_descriptor_extra, sizeof(usb_report_descriptor_extra)},
-/* #ifdef NKRO_ENABLE */
-/* 	{0x2200, NKRO_INTERFACE, keyboard2_report_desc, sizeof(keyboard2_report_desc)}, */
-/* 	{0x2100, NKRO_INTERFACE, (const uint8_t *)&(config_descriptor+NKRO_HID_DESC_OFFSET, sizeof(usb_descriptor_class_hid_t)}, */
-/* #endif */
+#ifdef NKRO_ENABLE
+	{0x2100, NKRO_INTERFACE, (const uint8_t *)&(config_descriptor.keyboard_nkro_class), sizeof(usb_descriptor_class_hid_t)},
+	{0x2200, NKRO_INTERFACE, usb_report_descriptor_keyboard_nkro, sizeof(usb_report_descriptor_keyboard_nkro)},
+#endif
         {0x0300, 0x0000, (const uint8_t *)&language_id, 0},
         {0x0301, 0x0409, (const uint8_t *)&manufacturer, 0},
         {0x0302, 0x0409, (const uint8_t *)&product, 0},
@@ -223,13 +289,16 @@ const usb_descriptor_list_t usb_descriptor_list[] = {
 const uint8_t usb_endpoint_config_table[NUM_ENDPOINTS] =
 {
   USB_ENDPOINT_TRANSMIT_ONLY, // kbd, 6kro
+#ifdef MOUSE_ENABLE
   USB_ENDPOINT_TRANSMIT_ONLY, // mouse
+#endif
+#ifdef CONSOLE_ENABLE
   USB_ENDPOINT_TRANSMIT_ONLY, // hid listen (debug)
+#endif
+#ifdef EXTRAKEY_ENABLE
   USB_ENDPOINT_TRANSMIT_ONLY, // media keys 
+#endif
+#ifdef NKRO_ENABLE
   USB_ENDPOINT_TRANSMIT_ONLY, // kbd, nkro
+#endif
 };
-  
-// OLD, FIXME
-void usb_init_serialnumber(void)
-{
-}
