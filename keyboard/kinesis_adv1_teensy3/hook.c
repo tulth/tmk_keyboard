@@ -21,7 +21,19 @@ void hook_matrix_change(keyevent_t event)
   }
 }
 
+unsigned long blink_ms_elapsed = 0;
+
+static inline void blink_update()
+{
+  if ((millis() - blink_ms_elapsed) > 200) {
+    GPIOC_PTOR = (1<<5);
+    blink_ms_elapsed = millis();
+  }
+}
+
+
 void hook_keyboard_loop(void)
 {
   kinesis_buzzer_update();
+  blink_update();
 }

@@ -54,8 +54,6 @@ void matrix_init(void)
   }
 }
 
-unsigned long blink_ms_elapsed = 0;
-
 bool _debounce_complete = false;
 uint32_t debounce_timestamp = 0;
 
@@ -80,14 +78,6 @@ static inline bool is_debounce_done(void)
     return true;
   }
   return false;
-}
-
-static inline void blink_update()
-{
-  if ((millis() - blink_ms_elapsed) > 200) {
-    GPIOC_PTOR = (1<<5);
-    blink_ms_elapsed = millis();
-  }
 }
 
 #define ROW_STROBE_DELAY_US 30
@@ -128,7 +118,6 @@ static inline void col_read_update()
 
 uint8_t matrix_scan(void)
 {
-  blink_update();
   if (row_strobe_not_read) {
     row_strobe_update();
   } else {
