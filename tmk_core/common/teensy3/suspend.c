@@ -15,22 +15,22 @@ void suspend_power_down(void)
 
 bool suspend_wakeup_condition(void)
 {
-    matrix_power_up();
-    for (uint8_t r = 0; r <  2 * MATRIX_ROWS; r++) {
-      matrix_scan();
-    }
-    matrix_power_down();
-    for (uint8_t r = 0; r < MATRIX_ROWS; r++) {
-        if (matrix_get_row(r)) return true;
-    }
-    return false;
+  matrix_power_up();
+  for (uint8_t r = 0; r <  2 * MATRIX_ROWS; r++) {
+    matrix_scan();
+  }
+  matrix_power_down();
+  for (uint8_t r = 0; r < MATRIX_ROWS; r++) {
+    if (matrix_get_row(r)) return true;
+  }
+  return false;
 }
 
 void suspend_wakeup_init(void)
 {
-    matrix_clear();
-    clear_keyboard();
+  matrix_clear();
+  clear_keyboard();
 #ifdef BACKLIGHT_ENABLE
-    backlight_init();
+  backlight_init();
 #endif
 }
