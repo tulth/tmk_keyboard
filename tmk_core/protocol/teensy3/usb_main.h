@@ -35,4 +35,7 @@
 #define NKRO_REPORT_KEYS (KBD2_SIZE - 1)
 #endif                   
 
+extern void usb_remote_wakeup(void);
+extern bool usb_is_sleeped(void);
+
 #endif /* _USB_MAIN_H_ */
