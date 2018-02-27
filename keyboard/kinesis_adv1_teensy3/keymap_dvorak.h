@@ -92,5 +92,5 @@ static const uint8_t keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 const action_t fn_actions[] = {
     ACTION_LAYER_TOGGLE(1),
-    ACTION_LAYER_TOGGLE(2),
+    ACTION_LAYER_MOMENTARY(2),
 };
