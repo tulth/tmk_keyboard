@@ -138,6 +138,7 @@ volatile uint8_t usb_configuration = 0;
 volatile uint8_t usb_reboot_timer = 0;
 
 volatile bool usb_sleeped = false;
+void usb_reset_isr(void);
 
 static void endpoint0_stall(void)
 {
@@ -670,6 +671,11 @@ void usb_isr(void)
                 usb_sleeped = false;
         }
 
+        if (status & USB_ISTAT_USBRST) {
+          usb_reset_isr();
+          return;
+        }
+
         if ((status & USB_ISTAT_SOFTOK /* 04 */ )) {
                 if (usb_configuration) {
                         t = usb_reboot_timer;
@@ -782,47 +788,6 @@ void usb_isr(void)
                 goto restart;
         }
 
-
-
-        if (status & USB_ISTAT_USBRST /* 01 */ ) {
-
-                // initialize BDT toggle bits
-                USB0_CTL = USB_CTL_ODDRST;
-                ep0_tx_bdt_bank = 0;
-
-                // set up buffers to receive Setup and OUT packets
-                table[index(0, RX, EVEN)].desc = BDT_DESC(EP0_SIZE, 0);
-                table[index(0, RX, EVEN)].addr = ep0_rx0_buf;
-                table[index(0, RX, ODD)].desc = BDT_DESC(EP0_SIZE, 0);
-                table[index(0, RX, ODD)].addr = ep0_rx1_buf;
-                table[index(0, TX, EVEN)].desc = 0;
-                table[index(0, TX, ODD)].desc = 0;
-
-                // activate endpoint 0
-                USB0_ENDPT0 = USB_ENDPT_EPRXEN | USB_ENDPT_EPTXEN | USB_ENDPT_EPHSHK;
-
-                // clear all ending interrupts
-                USB0_ERRSTAT = 0xFF;
-                USB0_ISTAT = 0xFF;
-
-                // set the address to zero during enumeration
-                USB0_ADDR = 0;
-
-                // enable other interrupts
-                USB0_ERREN = 0xFF;
-                USB0_INTEN = USB_INTEN_TOKDNEEN |
-                        USB_INTEN_SOFTOKEN |
-                        USB_INTEN_STALLEN |
-                        USB_INTEN_ERROREN |
-                        USB_INTEN_USBRSTEN |
-                        USB_INTEN_SLEEPEN;
-
-                // is this necessary?
-                USB0_CTL = USB_CTL_USBENSOFEN;
-                return;
-        }
-
-
         if ((status & USB_ISTAT_STALL /* 80 */ )) {
                 USB0_ENDPT0 = USB_ENDPT_EPRXEN | USB_ENDPT_EPTXEN | USB_ENDPT_EPHSHK;
                 USB0_ISTAT = USB_ISTAT_STALL;
@@ -837,23 +802,101 @@ void usb_isr(void)
 
 
 
+void usb_init_new(void)
+{
+#if F_CPU != 48000000
+#error F_CPU only supported for 48000000 Hz
+#endif
+  /* select clock source */
+  SIM_SOPT2 |= SIM_SOPT2_PLLFLLSEL;  /* use pll, fll does not meet usb jitter spec */
+  /* input clock is 96 MHz, but, usb core must run at 48 MHz */
+  /* 96 MHz / 2 = 1 / 2 = */
+  /* divider = 1 / 2 = (USBFRAC+1) / (USBDIV+1) => USBFRAC=0, USBDIV=1 */
+  SIM_CLKDIV2 = SIM_CLKDIV2_USBDIV(1);
+  SIM_SOPT2 |= SIM_SOPT2_USBSRC;  /* fll/pll source, not usb clkin */
+
+  /* usb clock gating */
+  SIM_SCGC4 |= SIM_SCGC4_USBOTG;
+
+  /* reset usb module */
+  USB0_USBTRC0 |= USB_USBTRC_USBRESET;
+
+  /* wait until out of reset */
+  while (USB0_USBTRC0 & USB_USBTRC_USBRESET) {}
+
+  /* set BDT base registers */
+  USB0_BDTPAGE1 = (((uint32_t)table >> 8 ) & 0xFE);
+  USB0_BDTPAGE2 = (((uint32_t)table >> 16) & 0xFF);
+  USB0_BDTPAGE3 = (((uint32_t)table >> 24) & 0xFF);
+
+  /* clear all USB ISR flags */
+  USB0_OTGISTAT = 0xFF;
+  USB0_ISTAT = 0xFF;
+  USB0_ERRSTAT = 0xFF;
+
+  /* enable weak pull-downs */
+  USB0_USBCTRL = USB_USBCTRL_PDE;
+
+  /* enable usb reset interrupt */
+  USB0_INTEN = USB_INTEN_USBRSTEN;
+  NVIC_SET_PRIORITY(IRQ_USBOTG, 112);
+  NVIC_ENABLE_IRQ(IRQ_USBOTG);
+
+  /* enable pull-up resistor */
+  USB0_CONTROL = USB_CONTROL_DPPULLUPNONOTG;
+}
+
+void usb_reset_isr(void)
+{
+  /* reset all ep's */
+  memset(table, 0, NUM_ENDPOINTS * sizeof(bdt_t));
+  USB0_CTL = USB_CTL_ODDRST;
+  ep0_tx_bdt_bank = 0;
+
+  /* configure ep0 */
+  table[index(0, RX, EVEN)].desc = BDT_DESC(EP0_SIZE, 0);
+  table[index(0, RX, EVEN)].addr = ep0_rx0_buf;
+  table[index(0, RX, ODD)].desc = BDT_DESC(EP0_SIZE, 0);
+  table[index(0, RX, ODD)].addr = ep0_rx1_buf;
+  table[index(0, TX, EVEN)].desc = 0;
+  table[index(0, TX, ODD)].desc = 0;
+  USB0_ENDPT0 = USB_ENDPT_EPRXEN | USB_ENDPT_EPTXEN | USB_ENDPT_EPHSHK;
+
+  /* clear all usb flags */
+  USB0_ERRSTAT = 0xFF;
+  USB0_ISTAT = 0xFF;
+
+  /* out of power, addr should be zero */
+  USB0_ADDR = 0;
+
+  /* enable usb interrupt sources */
+  USB0_ERREN = 0xFF;
+  USB0_INTEN = USB_INTEN_TOKDNEEN |
+    USB_INTEN_SOFTOKEN |
+    USB_INTEN_STALLEN |
+    USB_INTEN_ERROREN |
+    USB_INTEN_USBRSTEN |
+    USB_INTEN_SLEEPEN;
+
+  USB0_CTL = USB_CTL_USBENSOFEN;
+}
+
 void usb_init(void)
 {
         int i;
-
-        usb_init_serialnumber();
 
         for (i=0; i <= NUM_ENDPOINTS*4; i++) {
                 table[i].desc = 0;
                 table[i].addr = 0;
         }
 
+        usb_init_new();
+
         // this basically follows the flowchart in the Kinetis
         // Quick Reference User Guide, Rev. 1, 03/2012, page 141
 
         // assume 48 MHz clock already running
         // SIM - enable clock
-        SIM_SCGC4 |= SIM_SCGC4_USBOTG;
 #ifdef HAS_KINETIS_MPU
         MPU_RGDAAC0 |= 0x03000000;
 #endif
@@ -863,35 +906,6 @@ void usb_init(void)
         USB0_CLK_RECOVER_CTRL = USB_CLK_RECOVER_CTRL_CLOCK_RECOVER_EN |
                 USB_CLK_RECOVER_CTRL_RESTART_IFRTRIM_EN;
 #endif
-        // reset USB module
-        //USB0_USBTRC0 = USB_USBTRC_USBRESET;
-        //while ((USB0_USBTRC0 & USB_USBTRC_USBRESET) != 0) ; // wait for reset to end
-
-        // set desc table base addr
-        USB0_BDTPAGE1 = ((uint32_t)table) >> 8;
-        USB0_BDTPAGE2 = ((uint32_t)table) >> 16;
-        USB0_BDTPAGE3 = ((uint32_t)table) >> 24;
-
-        // clear all ISR flags
-        USB0_ISTAT = 0xFF;
-        USB0_ERRSTAT = 0xFF;
-        USB0_OTGISTAT = 0xFF;
-
-        //USB0_USBTRC0 |= 0x40; // undocumented bit
-
-        // enable USB
-        USB0_CTL = USB_CTL_USBENSOFEN;
-        USB0_USBCTRL = 0;
-
-        // enable reset interrupt
-        USB0_INTEN = USB_INTEN_USBRSTEN;
-
-        // enable interrupt in NVIC...
-        NVIC_SET_PRIORITY(IRQ_USBOTG, 112);
-        NVIC_ENABLE_IRQ(IRQ_USBOTG);
-
-        // enable d+ pullup
-        USB0_CONTROL = USB_CONTROL_DPPULLUPNONOTG;
 }
 
 
