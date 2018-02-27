@@ -14,6 +14,7 @@ SRC =
 SRC += led.c
 SRC += matrix.c
 SRC += keymap.c
+SRC += hook.c
 SRC += notes.c
 SRC += kinesis_adv1_teensy3.c
 
