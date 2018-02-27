@@ -15,6 +15,7 @@ SRC +=	$(COMMON_DIR)/util.c
 SRC +=	$(COMMON_DIR)/hook.c
 SRC +=	$(COMMON_DIR)/teensy3/printf.c
 SRC +=	$(COMMON_DIR)/teensy3/timer.c
+SRC +=	$(COMMON_DIR)/teensy3/suspend.c
 SRC +=	$(COMMON_DIR)/teensy3/cores/teensy3/mk20dx128.c
 SRC +=	$(COMMON_DIR)/teensy3/cores/teensy3/nonstd.c
 SRC +=	$(COMMON_DIR)/teensy3/cores/teensy3/pins_teensy.c

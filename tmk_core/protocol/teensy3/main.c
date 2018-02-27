@@ -24,12 +24,12 @@ int main(void)
 #endif
   led_set(host_keyboard_leds());
   while (1) {
-    /* while (suspend) { */
-    /*     suspend_power_down(); */
-    /*     if (remote_wakeup && suspend_wakeup_condition()) { */
-    /*         usb_remote_wakeup(); */
-    /*     } */
-    /* } */
+    while (usb_is_sleeped()) {
+        suspend_power_down();
+        if (suspend_wakeup_condition()) {
+            usb_remote_wakeup();
+        }
+    }
 
     keyboard_task(); 
   }

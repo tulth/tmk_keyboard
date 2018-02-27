@@ -31,6 +31,8 @@
 #ifndef _usb_dev_h_
 #define _usb_dev_h_
 
+#include <stdbool.h>
+
 #define USB_DESC_LIST_DEFINE
 #include "usb_desc.h"
 
@@ -56,6 +58,7 @@ uint32_t usb_tx_packet_count(uint32_t endpoint);
 void usb_tx(uint32_t endpoint, usb_packet_t *packet);
 void usb_tx_isochronous(uint32_t endpoint, void *data, uint32_t len);
 
+extern volatile bool usb_sleeped;
 extern volatile uint8_t usb_configuration;
 
 extern uint16_t usb_rx_byte_count_data[NUM_ENDPOINTS];

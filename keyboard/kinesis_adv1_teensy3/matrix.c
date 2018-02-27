@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <matrix.h>
+#include <string.h>  // for memset
 #include <host.h>  // for keyboard_nkro
 #include <printf.h>
 #include <util.h>  // for bitpop16
@@ -31,6 +32,12 @@ inline
 uint8_t matrix_cols(void)
 {
     return MATRIX_COLS;
+}
+
+void matrix_clear(void)
+{
+  memset(matrix, 0, sizeof(matrix_row_t) * MATRIX_ROWS);
+  memset(matrix_debouncing, 0, sizeof(matrix_row_t) * MATRIX_ROWS);
 }
 
 void matrix_init(void)
@@ -205,3 +212,7 @@ void select_row(uint8_t row)
   GPIOC_PCOR = (0x0F);  /* start all low */
   GPIOC_PSOR = (row & 0x0F);
 }
+
+void matrix_power_up(void) {}
+
+void matrix_power_down(void) {}
