@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <core_pins.h>  // for delay
 #include "suspend.h"
+#include "action.h"
 #include "matrix.h"
 
 // unused
