@@ -60,7 +60,7 @@ static uint8_t usb_report_descriptor_keyboard_nkro[] = {
 usb_descriptor_device_t device_descriptor = {
     .header = {.bLength         = sizeof(usb_descriptor_device_t),
                .bDescriptorType = USB_DESCRIPTOR_TYPE_DEVICE },
-    .bcdUSB                     = 0x0200,
+    .bcdUSB                     = 0x0110,
     .bDeviceClass               = 0,
     .bDeviceSubClass            = 0,
     .bDeviceProtocol            = 0,
@@ -83,7 +83,7 @@ usb_config_t config_descriptor = {
     .bConfigurationValue        = 1,
     .iConfiguration             = 0,
     .bmAttributes               = 0xA0,
-    .bMaxPower                  = 40,
+    .bMaxPower                  = 50,
   },
   // keyboard 6kro 
   {
