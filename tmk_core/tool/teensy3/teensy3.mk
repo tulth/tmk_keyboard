@@ -101,6 +101,9 @@ SRC += $(TMK_DIR)/protocol/teensy3/usb_dev.c
 SRC += $(TMK_DIR)/protocol/teensy3/usb_keyboard.c
 SRC += $(TMK_DIR)/protocol/teensy3/usb_hid_listen.c
 SRC += $(TMK_DIR)/protocol/teensy3/usb_desc.c
+SRC += $(TMK_DIR)/protocol/teensy3/usb/usb_report_keyboard_6kro.c
+SRC += $(TMK_DIR)/protocol/teensy3/usb/usb_report_mouse.c
+SRC += $(TMK_DIR)/protocol/teensy3/usb/usb_report_extra.c
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.
@@ -132,7 +135,8 @@ ASMXSRC = $(STARTUPASM) $(PORTASM) $(OSALASM)
 
 # VPATH = $(TMK_DIR) $(COMMON_DIR)/teensy $(TMK_DIR)/protocol/teensy \
 #         $(TMK_DIR)/protocol $(TARGET_DIR)
-VPATH = $(TMK_DIR) $(TMK_DIR)/protocol/teensy3 $(COMMON_DIR) $(COMMON_DIR)/teensy3 $(COMMON_DIR)/teensy3/cores/teensy3
+VPATH = $(TMK_DIR) $(TMK_DIR)/protocol/teensy3 \
+	$(COMMON_DIR) $(COMMON_DIR)/teensy3 $(COMMON_DIR)/teensy3/cores/teensy3
 
 
 #

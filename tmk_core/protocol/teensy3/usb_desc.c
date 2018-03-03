@@ -5,6 +5,7 @@
 #define USTR(s) XUSTR(s)
 #define XUSTR(s) u ## #s
 
+#ifdef CONSOLE_ENABLE
 uint8_t usb_report_descriptor_hid_listen[] = {
   0x06, 0x31, 0xFF,	    // Usage Page 0xFF31 (vendor defined)
   0x09, 0x74,		    // Usage 0x74
@@ -17,6 +18,7 @@ uint8_t usb_report_descriptor_hid_listen[] = {
   0x81, 0x02,		    // Input (array)
   0xC0			    // end collection
 };
+#endif
 
 #ifdef NKRO_ENABLE
 static uint8_t usb_report_descriptor_keyboard_nkro[] = {
@@ -269,14 +271,21 @@ const usb_descriptor_list_t usb_descriptor_list[] = {
 	{0x2100, KEYBOARD_INTERFACE, (const uint8_t *)&(config_descriptor.keyboard_6kro_class), sizeof(usb_descriptor_class_hid_t)},
         {0x2200, KEYBOARD_INTERFACE, usb_report_descriptor_keyboard_6kro, sizeof(usb_report_descriptor_keyboard_6kro)},
         
+#ifdef MOUSE_ENABLE
 	{0x2100, MOUSE_INTERFACE, (const uint8_t *)&(config_descriptor.mouse_class), sizeof(usb_descriptor_class_hid_t)},
 	{0x2200, MOUSE_INTERFACE, usb_report_descriptor_mouse, sizeof(usb_report_descriptor_mouse)},
+#endif
         
+#ifdef CONSOLE_ENABLE
 	{0x2100, HID_LISTEN_INTERFACE, (const uint8_t *)&(config_descriptor.hid_listen_class), sizeof(usb_descriptor_class_hid_t)},
 	{0x2200, HID_LISTEN_INTERFACE, usb_report_descriptor_hid_listen, sizeof(usb_report_descriptor_hid_listen)},
+#endif
         
+#ifdef EXTRAKEY_ENABLE
 	{0x2100, EXTRA_INTERFACE, (const uint8_t *)&(config_descriptor.extra_class), sizeof(usb_descriptor_class_hid_t)},
 	{0x2200, EXTRA_INTERFACE, usb_report_descriptor_extra, sizeof(usb_report_descriptor_extra)},
+#endif
+        
 #ifdef NKRO_ENABLE
 	{0x2100, NKRO_INTERFACE, (const uint8_t *)&(config_descriptor.keyboard_nkro_class), sizeof(usb_descriptor_class_hid_t)},
 	{0x2200, NKRO_INTERFACE, usb_report_descriptor_keyboard_nkro, sizeof(usb_report_descriptor_keyboard_nkro)},

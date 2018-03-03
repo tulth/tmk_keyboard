@@ -44,6 +44,7 @@
 #include "kinetis.h"
 #include "usb_mem.h"
 #include "host.h"
+#include "usb/usb_reports.h"
 #include <string.h> // for memset
 
 extern uint8_t *usb_report_descriptor_hid_listen;
@@ -343,8 +344,8 @@ static void usb_setup(void)
             if ((setup.bmRequestType == 0x21) &&
                 (setup.bRequest == HID_GET_REPORT) &&
                 (setup.wIndex == KEYBOARD_INTERFACE)) {
-              data = usb_report_descriptor_hid_listen;
-              datalen = sizeof(usb_report_descriptor_hid_listen);
+              data = usb_report_descriptor_keyboard_6kro;
+              datalen = sizeof(usb_report_descriptor_keyboard_6kro);
               goto send;
             }
             break;
@@ -876,7 +877,7 @@ void usb_init_new(void)
 void usb_reset_isr(void)
 {
   /* reset all ep's */
-  memset(table, 0, NUM_ENDPOINTS * sizeof(bdt_t));
+  memset(table, 0, sizeof(table));
   USB0_CTL = USB_CTL_ODDRST;
   ep0_tx_bdt_bank = 0;
 
