@@ -5,7 +5,7 @@
 #define USTR(s) XUSTR(s)
 #define XUSTR(s) u ## #s
 
-static uint8_t usb_report_descriptor_hid_listen[] = {
+uint8_t usb_report_descriptor_hid_listen[] = {
   0x06, 0x31, 0xFF,	    // Usage Page 0xFF31 (vendor defined)
   0x09, 0x74,		    // Usage 0x74
   0xA1, 0x53,		    // Collection 0x53
@@ -18,6 +18,7 @@ static uint8_t usb_report_descriptor_hid_listen[] = {
   0xC0			    // end collection
 };
 
+#ifdef NKRO_ENABLE
 static uint8_t usb_report_descriptor_keyboard_nkro[] = {
   0x05, 0x01,                           // Usage Page (Generic Desktop),
   0x09, 0x06,                           // Usage (Keyboard),
@@ -52,6 +53,7 @@ static uint8_t usb_report_descriptor_keyboard_nkro[] = {
   0x81, 0x02,                           //   Input (Data, Variable, Absolute),
   0xc0                                  // End Collection
 };
+#endif
 
 usb_descriptor_device_t device_descriptor = {
     .header = {.bLength         = sizeof(usb_descriptor_device_t),

@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdint.h>
 #include <stdbool.h>
 #include "report.h"
+#include "host.h"
 #include "host_driver.h"
 
 
@@ -29,11 +30,11 @@ extern "C" {
 #endif
 
 #ifdef NKRO_ENABLE
-extern bool keyboard_nkro;
+extern volatile bool keyboard_nkro;
 #endif
 
 extern uint8_t keyboard_idle;
-extern uint8_t keyboard_protocol;
+extern volatile uint8_t keyboard_protocol;
 
 
 /* host driver */

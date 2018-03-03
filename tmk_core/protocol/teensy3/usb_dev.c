@@ -46,6 +46,7 @@
 #include "host.h"
 #include <string.h> // for memset
 
+extern uint8_t *usb_report_descriptor_hid_listen;
 // buffer descriptor table
 
 typedef struct {
@@ -123,6 +124,14 @@ static union {
 #define SET_INTERFACE           11
 #define SYNCH_FRAME             12
 
+
+#define HID_GET_REPORT   0x01
+#define HID_GET_IDLE     0x02
+#define HID_GET_PROTOCOL 0x03
+#define HID_SET_REPORT   0x09
+#define HID_SET_IDLE     0x0A
+#define HID_SET_PROTOCOL 0x0B
+
 // SETUP always uses a DATA0 PID for the data field of the SETUP transaction.
 // transactions in the data phase start with DATA1 and toggle (figure 8-12, USB1.1)
 // Status stage uses a DATA1 PID.
@@ -167,6 +176,7 @@ static void usb_setup(void)
         uint8_t epconf;
         const uint8_t *cfg;
         int i;
+        uint8_t tmp;
 
         switch (setup.wRequestAndType) {
           case 0x0500: // SET_ADDRESS
@@ -307,17 +317,6 @@ static void usb_setup(void)
                 }
                 endpoint0_stall();
                 return;
-#if defined(CDC_STATUS_INTERFACE)
-          case 0x2221: // CDC_SET_CONTROL_LINE_STATE
-                usb_cdc_line_rtsdtr_millis = systick_millis_count;
-                usb_cdc_line_rtsdtr = setup.wValue;
-                break;
-          case 0x2321: // CDC_SEND_BREAK
-                break;
-          case 0x2021: // CDC_SET_LINE_CODING
-                return;
-#endif
-
 #if defined(MTP_INTERFACE)
         case 0x64A1: // Cancel Request (PTP spec, 5.2.1, page 8)
                 // TODO: required by PTP spec
@@ -340,12 +339,45 @@ static void usb_setup(void)
 
 // TODO: this does not work... why?
 #if defined(KEYBOARD_INTERFACE)
+          case 0x0121: // HID GET_REPORT
+            if ((setup.bmRequestType == 0x21) &&
+                (setup.bRequest == HID_GET_REPORT) &&
+                (setup.wIndex == KEYBOARD_INTERFACE)) {
+              data = usb_report_descriptor_hid_listen;
+              datalen = sizeof(usb_report_descriptor_hid_listen);
+              goto send;
+            }
+            break;
           case 0x0921: // HID SET_REPORT
-                return;
+            return;
+          case 0x0221: // HID GET_IDLE
+            tmp = keyboard_idle_config;
+            data = &tmp;
+            datalen = 1;
+            goto send;
           case 0x0A21: // HID SET_IDLE
-                break;
+            if ((setup.bmRequestType == 0x21) &&
+                (setup.bRequest == HID_SET_IDLE) &&
+                (setup.wIndex == KEYBOARD_INTERFACE)) {
+              keyboard_idle_config = (setup.wValue >> 8);
+            }
+            break;
+          case 0x0321: // HID GET_PROTOCOL
+            tmp = keyboard_protocol;
+            data = &tmp;
+            datalen = 1;
+            goto send;
           case 0x0B21: // HID SET_PROTOCOL
-                break;
+            if ((setup.bmRequestType == 0x21) &&
+                (setup.bRequest == HID_SET_PROTOCOL) &&
+                (setup.wIndex == KEYBOARD_INTERFACE)) {
+              keyboard_protocol = (setup.wValue & 0xFF) != 0x00;
+#ifdef NKRO_ENABLE
+              keyboard_nkro = !!keyboard_protocol;
+#endif
+              clear_keyboard(); 
+            }
+            break;
           // case 0xC940:
 #endif
           default:
@@ -434,29 +466,8 @@ static void usb_control(uint32_t stat)
                 break;
         case 0x01:  // OUT transaction received from host
         case 0x02:
-#ifdef CDC_STATUS_INTERFACE
-                if (setup.wRequestAndType == 0x2021 /*CDC_SET_LINE_CODING*/) {
-                        int i;
-                        uint8_t *dst = (uint8_t *)usb_cdc_line_coding;
-                        for (i=0; i<7; i++) {
-                                *dst++ = *buf++;
-                        }
-                        if (usb_cdc_line_coding[0] == 134) usb_reboot_timer = 15;
-                        endpoint0_transmit(NULL, 0);
-                }
-#endif
                 if (setup.word1 == 0x02000921 && setup.word2 == ((1<<16)|KEYBOARD_INTERFACE)) {
                   driver_keyboard_leds = buf[0];
-                  endpoint0_transmit(NULL, 0);
-                }
-                if ((setup.bmRequestType == 0x21) &&
-                    (setup.bRequest == 0x0B) &&
-                    (setup.wIndex == KEYBOARD_INTERFACE)) {
-                  keyboard_protocol = (setup.wValue & 0xFF) != 0x00;
-#ifdef NKRO_ENABLE
-                  keyboard_nkro = !!keyboard_protocol;
-#endif
-                  clear_keyboard();
                   endpoint0_transmit(NULL, 0);
                 }
 #ifdef NKRO_ENABLE
@@ -681,11 +692,17 @@ void usb_isr(void)
         restart:
         status = USB0_ISTAT;
 
+        if ((status & USB_ISTAT_RESUME)) {
+          usb_sleeped = false;
+          USB0_INTEN &= ~USB_INTEN_RESUMEEN;
+        }
         if ((status & USB_ISTAT_SLEEP /* 10 */ )) {
                 USB0_ISTAT = USB_ISTAT_SLEEP;
+                USB0_INTEN |= USB_INTEN_RESUMEEN;
                 usb_sleeped = true;
         } else {
-                usb_sleeped = false;
+          usb_sleeped = false;
+          USB0_INTEN &= ~USB_INTEN_RESUMEEN;
         }
 
         if (status & USB_ISTAT_USBRST) {
@@ -700,13 +717,6 @@ void usb_isr(void)
                                 usb_reboot_timer = --t;
                                 if (!t) _reboot_Teensyduino_();
                         }
-#ifdef CDC_DATA_INTERFACE
-                        t = usb_cdc_transmit_flush_timer;
-                        if (t) {
-                                usb_cdc_transmit_flush_timer = --t;
-                                if (t == 0) usb_serial_flush_callback();
-                        }
-#endif
 #ifdef HID_LISTEN_INTERFACE
                         t = usb_hid_listen_transmit_flush_timer;
                         if (t) {
