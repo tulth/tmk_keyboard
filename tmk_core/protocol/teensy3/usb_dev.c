@@ -340,7 +340,7 @@ static void usb_setup(void)
 
 // TODO: this does not work... why?
 #if defined(KEYBOARD_INTERFACE)
-          case 0x0121: // HID GET_REPORT
+          case 0x01A1: // HID GET_REPORT
             if ((setup.bmRequestType == 0x21) &&
                 (setup.bRequest == HID_GET_REPORT) &&
                 (setup.wIndex == KEYBOARD_INTERFACE)) {
@@ -351,7 +351,7 @@ static void usb_setup(void)
             break;
           case 0x0921: // HID SET_REPORT
             return;
-          case 0x0221: // HID GET_IDLE
+          case 0x02A1: // HID GET_IDLE
             tmp = keyboard_idle_config;
             data = &tmp;
             datalen = 1;
@@ -363,7 +363,7 @@ static void usb_setup(void)
               keyboard_idle_config = (setup.wValue >> 8);
             }
             break;
-          case 0x0321: // HID GET_PROTOCOL
+          case 0x03A1: // HID GET_PROTOCOL
             tmp = keyboard_protocol;
             data = &tmp;
             datalen = 1;
